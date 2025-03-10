@@ -239,16 +239,28 @@ document.addEventListener('DOMContentLoaded', toggleStageAccess);
 
 <!-- Özel CSS -->
 <style>
+    /* Sekme metin rengi */
     .nav-tabs .nav-link {
-        color: red; /* Normal durumdaki sekme rengi kırmızı */
+        color: #ff0000 !important; /* Kırmızı renk, !important ile Bootstrap'i geçersiz kıl */
     }
+
+    /* Üzerine gelindiğinde */
     .nav-tabs .nav-link:hover {
-        color: darkred; /* Üzerine gelindiğinde koyu kırmızı */
+        color: #cc0000 !important; /* Koyu kırmızı */
+        background-color: #f8f9fa; /* Hafif gri arka plan */
     }
+
+    /* Aktif sekme */
     .nav-tabs .nav-link.active {
-        color: red; /* Aktif sekme rengi kırmızı */
-        font-weight: bold; /* Aktif sekme için kalın yazı (isteğe bağlı) */
-        background-color: #f8f9fa; /* Aktif sekme arka planı açık gri (görünürlüğü artırır) */
+        color: #ff0000 !important; /* Aktif sekme kırmızı */
+        background-color: #e9ecef !important; /* Daha belirgin gri arka plan */
+        border-bottom: 2px solid #ff0000 !important; /* Alt çizgi kırmızı */
+        font-weight: bold; /* Kalın yazı */
+    }
+
+    /* Sekme kenarlıklarını düzenle */
+    .nav-tabs {
+        border-bottom: 1px solid #dee2e6;
     }
 </style>
 {% endblock %}
