@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<h3>Reports</h3>
+<form method="POST" class="mb-3">
+    <div class="input-group">
+        <input type="text" class="form-control" name="search" placeholder="Search by parent name" value="{{ search }}">
+        <button type="submit" class="btn btn-primary">Search</button>
+    </div>
+</form>
+<table class="table">
+    <thead>
+        <tr><th>ID</th><th>Name</th><th>Stage</th><th>Created At</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+        {% for parent in parents %}
+            <tr>
+                <td>{{ parent.id }}</td>
+                <td>{{ parent.name }}</td>
+                <td>{{ parent.stage_name }}</td>
+                <td>{{ parent.created_at }}</td>
+                <td>
+                    <a href="{{ url_for('parent_detail', parent_id=parent.id) }}" class="btn btn-sm btn-primary">View</a>
+                    <a href="{{ url_for('report_pdf', parent_id=parent.id) }}" class="btn btn-sm btn-success">Download PDF</a>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+{% block content %}
+<ul class="nav nav-tabs">
+    <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#users">Users</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#stages">Stages</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#forms">Forms</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#parents">Parents</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#logs">Logs</a></li>
+    <li class="nav-item"><a class="nav-link" href="{{ url_for('report') }}">Reports</a></li>
+</ul>
+<div class="tab-content mt-3">
+    <div class="tab-pane fade show active" id="users">
+        <h3>Users</h3>
+        <form method="POST" action="{{ url_for('add_user') }}" class="mb-3">
+            <div class="row">
+                <div class="col">
+                    <input type="text" class="form-control" name="username" placeholder="Username" required>
+                </div>
+                <div class="col">
+                    <input type="password" class="form-control" name="password" placeholder="Password" required>
+                </div>
+                <div class="col">
+                    <select class="form-select" name="role" required>
+                        <option value="admin">Admin</option>
+                        <option value="staff">Staff</option>
+                    </select>
+                </div>
+                <div class="col">
+                    <select class="form-select" name="stage_access">
+                        <option value="">None</option>
+                        {% for stage in stages %}
+                            <option value="{{ stage.stage_number }}">{{ stage.stage_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col">
+                    <button type="submit" class="btn btn-primary">Add User</button>
+                </div>
+            </div>
+        </form>
+        <table class="table">
+            <thead>
+                <tr><th>ID</th><th>Username</th><th>Role</th><th>Stage Access</th><th>Last Login</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                    <tr>
+                        <td>{{ user.id }}</td>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.role }}</td>
+                        <td>{{ user.stage_access or 'N/A' }}</td>
+                        <td>{{ user.last_login or 'Never' }}</td>
+                        <td>
+                            <form method="POST" action="{{ url_for('change_password', user_id=user.id) }}" class="d-inline">
+                                <input type="password" name="password" placeholder="New Password" required>
+                                <button type="submit" class="btn btn-sm btn-primary">Change</button>
+                            </form>
+                            <a href="{{ url_for('delete_user', user_id=user.id) }}" class="btn btn-sm btn-danger">Delete</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="tab-pane fade" id="stages">
+        <h3>Stages</h3>
+        <form method="POST" action="{{ url_for('add_stage') }}" class="mb-3">
+            <div class="row">
+                <div class="col">
+                    <input type="number" class="form-control" name="stage_number" placeholder="Stage Number" required>
+                </div>
+                <div class="col">
+                    <input type="text" class="form-control" name="stage_name" placeholder="Stage Name" required>
+                </div>
+                <div class="col">
+                    <button type="submit" class="btn btn-primary">Add Stage</button>
+                </div>
+            </div>
+        </form>
+        <table class="table">
+            <thead>
+                <tr><th>ID</th><th>Number</th><th>Name</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+                {% for stage in stages %}
+                    <tr>
+                        <td>{{ stage.id }}</td>
+                        <td>{{ stage.stage_number }}</td>
+                        <td>{{ stage.stage_name }}</td>
+                        <td><a href="{{ url_for('delete_stage', stage_id=stage.id) }}" class="btn btn-sm btn-danger">Delete</a></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="tab-pane fade" id="forms">
+        <h3>Forms</h3>
+        <form method="POST" action="{{ url_for('add_form') }}" class="mb-3">
+            <div class="row">
+                <div class="col">
+                    <select class="form-select" name="stage_id" required>
+                        {% for stage in stages %}
+                            <option value="{{ stage.id }}">{{ stage.stage_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col">
+                    <input type="text" class="form-control" name="question" placeholder="Question" required>
+                </div>
+                <div class="col">
+                    <select class="form-select" name="type" required>
+                        <option value="text">Text</option>
+                        <option value="multiple">Multiple Choice</option>
+                        <option value="checkbox">Checkbox</option>
+                        <option value="file">File Upload</option>
+                    </select>
+                </div>
+                <div class="col">
+                    <input type="text" class="form-control" name="options" placeholder="Options (comma-separated)">
+                </div>
+                <div class="col">
+                    <input type="checkbox" name="allow_file_upload" value="1"> File Upload
+                    <input type="checkbox" name="required" value="1"> Required
+                </div>
+                <div class="col">
+                    <button type="submit" class="btn btn-primary">Add Question</button>
+                </div>
+            </div>
+        </form>
+        <table class="table">
+            <thead>
+                <tr><th>ID</th><th>Stage</th><th>Question</th><th>Type</th><th>Options</th><th>File Upload</th><th>Required</th></tr>
+            </thead>
+            <tbody>
+                {% for form in forms %}
+                    <tr>
+                        <td>{{ form.id }}</td>
+                        <td>{{ form.stage_number }}</td>
+                        <td>{{ form.question }}</td>
+                        <td>{{ form.type }}</td>
+                        <td>{{ form.options or 'N/A' }}</td>
+                        <td>{{ 'Yes' if form.allow_file_upload else 'No' }}</td>
+                        <td>{{ 'Yes' if form.required else 'No' }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="tab-pane fade" id="parents">
+        <h3>Parents</h3>
+        <table class="table">
+            <thead>
+                <tr><th>ID</th><th>Name</th><th>Stage</th><th>Created At</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+                {% for parent in parents %}
+                    <tr>
+                        <td>{{ parent.id }}</td>
+                        <td>{{ parent.name }}</td>
+                        <td>{{ parent.stage_id }}</td>
+                        <td>{{ parent.created_at }}</td>
+                        <td><a href="{{ url_for('parent_detail', parent_id=parent.id) }}" class="btn btn-sm btn-primary">View</a></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="tab-pane fade" id="logs">
+        <h3>Logs</h3>
+        <table class="table">
+            <thead>
+                <tr><th>ID</th><th>User</th><th>Action</th><th>Timestamp</th></tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                    <tr>
+                        <td>{{ log.id }}</td>
+                        <td>{{ log.username }}</td>
+                        <td>{{ log.action }}</td>
+                        <td>{{ log.timestamp }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
