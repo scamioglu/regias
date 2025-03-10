@@ -47,10 +47,22 @@ with get_db() as conn:
     conn.execute('CREATE TABLE IF NOT EXISTS parents (id INTEGER PRIMARY KEY, name TEXT, stage_id INTEGER, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)')
     conn.execute('CREATE TABLE IF NOT EXISTS answers (id INTEGER PRIMARY KEY, parent_id INTEGER, form_id INTEGER, answer TEXT, file_path TEXT)')
     conn.execute('CREATE TABLE IF NOT EXISTS logs (id INTEGER PRIMARY KEY, user_id INTEGER, action TEXT, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)')
+    
+    # Admin kullanıcısını ekle
     admin_exists = conn.execute("SELECT COUNT(*) FROM users WHERE username = 'admin'").fetchone()[0]
     if admin_exists == 0:
         hashed_password = generate_password_hash('sekc123')
         conn.execute("INSERT INTO users (username, password, role) VALUES (?, ?, ?)", ('admin', hashed_password, 'admin'))
+    
+    # Başlangıç aşamalarını ekle
+    stages_exist = conn.execute("SELECT COUNT(*) FROM stages").fetchone()[0]
+    if stages_exist == 0:
+        conn.execute("INSERT INTO stages (stage_number, stage_name) VALUES (?, ?)", (1, 'Aşama 1'))
+        conn.execute("INSERT INTO stages (stage_number, stage_name) VALUES (?, ?)", (2, 'Aşama 2'))
+        conn.execute("INSERT INTO stages (stage_number, stage_name) VALUES (?, ?)", (3, 'Aşama 3')) 
+        conn.execute("INSERT INTO stages (stage_number, stage_name) VALUES (?, ?)", (4, 'Aşama 4'))
+        conn.execute("INSERT INTO stages (stage_number, stage_name) VALUES (?, ?)", (5, 'Aşama 5'))
+        
     conn.commit()
 
 class User(UserMixin):
@@ -165,10 +177,13 @@ def add_user():
         username = request.form.get('username')
         password = request.form.get('password')
         role = request.form.get('role')
-        stage_access_raw = request.form.get('stage_access', '')  # Boş string varsayılanı
-        stage_access = int(stage_access_raw) if stage_access_raw and role == 'staff' else None  # Boşsa None
+        stage_access_raw = request.form.get('stage_access', '')
+        stage_access = int(stage_access_raw) if stage_access_raw and role == 'staff' else None
         if not username or not password or not role:
             flash('Username, password, and role are required', 'error')
+            return redirect(url_for('admin_dashboard'))
+        if role == 'staff' and not stage_access_raw:
+            flash('Stage access is required for staff', 'error')
             return redirect(url_for('admin_dashboard'))
         
         with get_db() as conn:
