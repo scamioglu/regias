@@ -14,18 +14,18 @@ import io
 
 app = Flask(__name__)
 load_dotenv()
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
-app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER')
-app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT'))
-app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS') == 'True'
-app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
-app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
+app.config['SECRET_KEY'] = os.getenv('106098160598010924')
+app.config['MAIL_SERVER'] = os.getenv('smtp.gmail.com')
+app.config['MAIL_PORT'] = int(os.getenv('587'))
+app.config['MAIL_USE_TLS'] = os.getenv('True') == 'True'
+app.config['MAIL_USERNAME'] = os.getenv('scamioglu@gmail.com')
+app.config['MAIL_PASSWORD'] = os.getenv('zoqg ajmn idqz acgx')
 mail = Mail(app)
 
 cloudinary.config(
-    cloud_name=os.getenv('CLOUDINARY_URL').split('@')[1],
-    api_key=os.getenv('CLOUDINARY_URL').split('//')[1].split(':')[0],
-    api_secret=os.getenv('CLOUDINARY_URL').split(':')[1].split('@')[0]
+    cloud_name=os.getenv('dmmsncj6x'),
+    api_key=os.getenv('CLOUDI552881692187293'),
+    api_secret=os.getenv('rtrD4fSHx-t1ZQOVUF225s8WNG0')
 )
 
 login_manager = LoginManager()
