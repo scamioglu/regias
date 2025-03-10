@@ -73,19 +73,28 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        with get_db() as conn:
-            user = conn.execute('SELECT * FROM users WHERE username = ?', (username,)).fetchone()
-            if user and check_password_hash(user['password'], password):
-                user_obj = User(user['id'], user['username'], user['password'], user['role'], user['stage_access'])
-                login_user(user_obj)
-                conn.execute('UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?', (user['id'],))
-                conn.commit()
-                if user['role'] == 'admin':
-                    return redirect(url_for('admin_dashboard'))
-                return redirect(url_for('staff_form'))
-            flash('Invalid credentials')
+        username = request.form.get('username')
+        password = request.form.get('password')
+        if not username or not password:
+            flash('Username and password are required', 'error')
+            return render_template('login.html')
+        
+        try:
+            with get_db() as conn:
+                user = conn.execute('SELECT * FROM users WHERE username = ?', (username,)).fetchone()
+                if user and check_password_hash(user['password'], password):
+                    user_obj = User(user['id'], user['username'], user['role'])
+                    login_user(user_obj)
+                    conn.execute('UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?', (user['id'],))
+                    conn.commit()
+                    if user['role'] == 'admin':
+                        return redirect(url_for('admin_dashboard'))
+                    else:
+                        return redirect(url_for('staff_dashboard'))
+                else:
+                    flash('Invalid credentials', 'error')
+        except Exception as e:
+            flash(f'An error occurred: {str(e)}', 'error')
     return render_template('login.html')
 
 @app.route('/logout')
