@@ -37,15 +37,15 @@
                         <input type="password" class="form-control" name="password" placeholder="Password" required>
                     </div>
                     <div class="col">
-                        <select class="form-select" name="role" required>
+                        <select class="form-select" name="role" id="role_select" required onchange="toggleStageAccess()">
                             <option value="" disabled selected>Select Role</option>
                             <option value="admin">Admin</option>
                             <option value="staff">Staff</option>
                         </select>
                     </div>
                     <div class="col">
-                        <select class="form-select" name="stage_access">
-                            <option value="">No Stage Access (Admin)</option>
+                        <select class="form-select" name="stage_access" id="stage_access_select">
+                            <option value="">No Stage Access</option>
                             {% for stage in stages %}
                                 <option value="{{ stage.stage_number }}">{{ stage.stage_name }} ({{ stage.stage_number }})</option>
                             {% endfor %}
@@ -219,4 +219,22 @@
         </div>
     </div>
 </div>
+
+<!-- JavaScript ile Stage Access Kontrolü -->
+<script>
+function toggleStageAccess() {
+    const roleSelect = document.getElementById('role_select');
+    const stageAccessSelect = document.getElementById('stage_access_select');
+    if (roleSelect.value === 'staff') {
+        stageAccessSelect.required = true;
+        stageAccessSelect.disabled = false;
+    } else {
+        stageAccessSelect.required = false;
+        stageAccessSelect.disabled = true;
+        stageAccessSelect.value = ''; // Admin seçildiğinde sıfırla
+    }
+}
+// Sayfa yüklendiğinde başlangıç durumunu ayarla
+document.addEventListener('DOMContentLoaded', toggleStageAccess);
+</script>
 {% endblock %}
