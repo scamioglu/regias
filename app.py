@@ -59,7 +59,7 @@ with get_db() as conn:
     if stages_exist == 0:
         conn.execute("INSERT INTO stages (stage_number, stage_name) VALUES (?, ?)", (1, 'Aşama 1'))
         conn.execute("INSERT INTO stages (stage_number, stage_name) VALUES (?, ?)", (2, 'Aşama 2'))
-        conn.execute("INSERT INTO stages (stage_number, stage_name) VALUES (?, ?)", (3, 'Aşama 3')) 
+        conn.execute("INSERT INTO stages (stage_number, stage_name) VALUES (?, ?)", (3, 'Aşama 3'))
         conn.execute("INSERT INTO stages (stage_number, stage_name) VALUES (?, ?)", (4, 'Aşama 4'))
         conn.execute("INSERT INTO stages (stage_number, stage_name) VALUES (?, ?)", (5, 'Aşama 5'))
         
@@ -106,7 +106,7 @@ def login():
                     if user['role'] == 'admin':
                         return redirect(url_for('admin_dashboard'))
                     else:
-                        return redirect(url_for('staff_dashboard'))
+                        return redirect(url_for('staff_form'))  # staff_dashboard yerine staff_form
                 else:
                     app.logger.info(f"Invalid credentials for {username}")
                     flash('Invalid credentials', 'error')
