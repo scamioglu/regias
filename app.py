@@ -11,22 +11,25 @@ from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table
 from reportlab.lib.styles import getSampleStyleSheet
 import io
+import logging
 
 app = Flask(__name__)
 load_dotenv()
-app.config['SECRET_KEY'] = os.getenv('106098160598010924')
-app.config['MAIL_SERVER'] = os.getenv('smtp.gmail.com')
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'default-secret-key')
+app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER', 'smtp.gmail.com')
 app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT', '587'))
-app.config['MAIL_USE_TLS'] = os.getenv('True') == 'True'
-app.config['MAIL_USERNAME'] = os.getenv('scamioglu@gmail.com')
-app.config['MAIL_PASSWORD'] = os.getenv('zoqg ajmn idqz acgx')
+app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS', 'True') == 'True'
+app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
 mail = Mail(app)
 
 cloudinary.config(
-    cloud_name=os.getenv('dmmsncj6x'),
-    api_key=os.getenv('CLOUDI552881692187293'),
-    api_secret=os.getenv('rtrD4fSHx-t1ZQOVUF225s8WNG0')
+    cloud_name=os.getenv('CLOUDINARY_CLOUD_NAME'),
+    api_key=os.getenv('CLOUDINARY_API_KEY'),
+    api_secret=os.getenv('CLOUDINARY_API_SECRET')
 )
+
+app.logger.setLevel(logging.INFO)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -49,7 +52,7 @@ with get_db() as conn:
         hashed_password = generate_password_hash('sekc123')
         conn.execute("INSERT INTO users (username, password, role) VALUES (?, ?, ?)", ('admin', hashed_password, 'admin'))
     conn.commit()
-    
+
 class User(UserMixin):
     def __init__(self, id, username, password, role, stage_access):
         self.id = id
@@ -83,17 +86,20 @@ def login():
             with get_db() as conn:
                 user = conn.execute('SELECT * FROM users WHERE username = ?', (username,)).fetchone()
                 if user and check_password_hash(user['password'], password):
-                    user_obj = User(user['id'], user['username'], user['role'])
+                    user_obj = User(user['id'], user['username'], user['password'], user['role'], user['stage_access'])
                     login_user(user_obj)
                     conn.execute('UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?', (user['id'],))
                     conn.commit()
+                    app.logger.info(f"User {username} logged in successfully")
                     if user['role'] == 'admin':
                         return redirect(url_for('admin_dashboard'))
                     else:
                         return redirect(url_for('staff_dashboard'))
                 else:
+                    app.logger.info(f"Invalid credentials for {username}")
                     flash('Invalid credentials', 'error')
         except Exception as e:
+            app.logger.error(f"Login error for {username}: {str(e)}")
             flash(f'An error occurred: {str(e)}', 'error')
     return render_template('login.html')
 
@@ -303,6 +309,15 @@ def report_pdf(parent_id):
     doc.build(elements)
     buffer.seek(0)
     return send_file(buffer, as_attachment=True, download_name=f"{parent['name']}_report.pdf")
+
+@app.route('/test-admin')
+def test_admin():
+    try:
+        with get_db() as conn:
+            user = conn.execute("SELECT * FROM users WHERE username = 'admin'").fetchone()
+            return f"Admin user: {dict(user) if user else 'Not found'}"
+    except Exception as e:
+        return f"Error: {str(e)}"
 
 if __name__ == '__main__':
     app.run(debug=True)
