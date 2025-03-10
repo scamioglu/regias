@@ -45,7 +45,12 @@ with get_db() as conn:
     conn.execute('CREATE TABLE IF NOT EXISTS answers (id INTEGER PRIMARY KEY, parent_id INTEGER, form_id INTEGER, answer TEXT, file_path TEXT)')
     conn.execute('CREATE TABLE IF NOT EXISTS logs (id INTEGER PRIMARY KEY, user_id INTEGER, action TEXT, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)')
     conn.commit()
-
+admin_exists = conn.execute("SELECT COUNT(*) FROM users WHERE username = 'admin'").fetchone()[0]
+    if admin_exists == 0:
+        hashed_password = generate_password_hash('sekc123')  # Şifreyi buradan değiştirebilirsiniz
+        conn.execute("INSERT INTO users (username, password, role) VALUES (?, ?, ?)", 
+                     ('admin', hashed_password, 'admin'))
+    conn.commit()
 class User(UserMixin):
     def __init__(self, id, username, password, role, stage_access):
         self.id = id
