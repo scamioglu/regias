@@ -231,10 +231,24 @@ function toggleStageAccess() {
     } else {
         stageAccessSelect.required = false;
         stageAccessSelect.disabled = true;
-        stageAccessSelect.value = ''; // Admin seçildiğinde sıfırla
+        stageAccessSelect.value = '';
     }
 }
-// Sayfa yüklendiğinde başlangıç durumunu ayarla
 document.addEventListener('DOMContentLoaded', toggleStageAccess);
 </script>
+
+<!-- Özel CSS -->
+<style>
+    .nav-tabs .nav-link {
+        color: red; /* Normal durumdaki sekme rengi kırmızı */
+    }
+    .nav-tabs .nav-link:hover {
+        color: darkred; /* Üzerine gelindiğinde koyu kırmızı */
+    }
+    .nav-tabs .nav-link.active {
+        color: red; /* Aktif sekme rengi kırmızı */
+        font-weight: bold; /* Aktif sekme için kalın yazı (isteğe bağlı) */
+        background-color: #f8f9fa; /* Aktif sekme arka planı açık gri (görünürlüğü artırır) */
+    }
+</style>
 {% endblock %}
