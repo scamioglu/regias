@@ -161,15 +161,25 @@ def admin_dashboard():
 def add_user():
     if current_user.role != 'admin':
         return redirect(url_for('staff_form'))
-    username = request.form['username']
-    password = request.form['password']
-    role = request.form['role']
-    stage_access = int(request.form['stage_access']) if role == 'staff' else None
-    with get_db() as conn:
-        conn.execute('INSERT INTO users (username, password, role, stage_access) VALUES (?, ?, ?, ?)', 
-                     (username, generate_password_hash(password), role, stage_access))
-        conn.execute('INSERT INTO logs (user_id, action) VALUES (?, ?)', (current_user.id, f'Added user {username}'))
-        conn.commit()
+    try:
+        username = request.form.get('username')
+        password = request.form.get('password')
+        role = request.form.get('role')
+        stage_access = int(request.form.get('stage_access', 0)) if role == 'staff' else None
+        if not username or not password or not role:
+            flash('Username, password, and role are required', 'error')
+            return redirect(url_for('admin_dashboard'))
+        
+        with get_db() as conn:
+            conn.execute('INSERT INTO users (username, password, role, stage_access) VALUES (?, ?, ?, ?)', 
+                         (username, generate_password_hash(password), role, stage_access))
+            conn.execute('INSERT INTO logs (user_id, action) VALUES (?, ?)', (current_user.id, f'Added user {username}'))
+            conn.commit()
+        app.logger.info(f"User {username} added successfully by {current_user.username}")
+        flash(f'User {username} added successfully', 'success')
+    except Exception as e:
+        app.logger.error(f"Error adding user: {str(e)}")
+        flash(f'Error adding user: {str(e)}', 'error')
     return redirect(url_for('admin_dashboard'))
 
 @app.route('/admin/delete_user/<int:user_id>')
