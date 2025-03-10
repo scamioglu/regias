@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <h3 class="card-title">Form for {{ stages[0].stage_name }}</h3>
+        <form method="POST" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label class="form-label">Parent Name</label>
+                <input type="text" class="form-control" name="parent_name" placeholder="Enter parent name" required>
+            </div>
+            {% for form in forms %}
+                <div class="mb-3">
+                    <label class="form-label">{{ form.question }} {% if form.required %}(Required){% endif %}</label>
+                    {% if form.type == 'text' %}
+                        <input type="text" class="form-control" name="answer_{{ form.id }}" {% if form.required %}required{% endif %}>
+                    {% elif form.type == 'multiple' %}
+                        <select class="form-select" name="answer_{{ form.id }}" {% if form.required %}required{% endif %}>
+                            <option value="">Select an option</option>
+                            {% for option in form.options.split(',') %}
+                                <option value="{{ option }}">{{ option }}</option>
+                            {% endfor %}
+                        </select>
+                    {% elif form.type == 'checkbox' %}
+                        {% for option in form.options.split(',') %}
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" name="answer_{{ form.id }}" value="{{ option }}">
+                                <label class="form-check-label">{{ option }}</label>
+                            </div>
+                        {% endfor %}
+                    {% elif form.type == 'file' %}
+                        <input type="file" class="form-control" name="file_{{ form.id }}" accept="image/*" {% if form.required %}required{% endif %}>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

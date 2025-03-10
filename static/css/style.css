@@ -1,0 +1,25 @@
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f4f7f6;
+}
+.navbar {
+    background-color: #2c3e50;
+}
+.navbar-brand, .nav-link {
+    color: white !important;
+}
+.card {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+.btn-primary {
+    background-color: #3498db;
+    border-color: #3498db;
+}
+.btn-primary:hover {
+    background-color: #2980b9;
+    border-color: #2980b9;
+}
+.table {
+    background-color: white;
+}
