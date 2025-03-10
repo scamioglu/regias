@@ -165,7 +165,8 @@ def add_user():
         username = request.form.get('username')
         password = request.form.get('password')
         role = request.form.get('role')
-        stage_access = int(request.form.get('stage_access', 0)) if role == 'staff' else None
+        stage_access_raw = request.form.get('stage_access', '')  # Boş string varsayılanı
+        stage_access = int(stage_access_raw) if stage_access_raw and role == 'staff' else None  # Boşsa None
         if not username or not password or not role:
             flash('Username, password, and role are required', 'error')
             return redirect(url_for('admin_dashboard'))
