@@ -1,28 +1,33 @@
 {% extends "base.html" %}
 {% block content %}
-<h3>Parent: {{ parent.name }}</h3>
-<ul class="nav nav-tabs">
-    {% for stage in stages %}
-        <li class="nav-item">
-            <a class="nav-link {% if loop.first %}active{% endif %}" data-bs-toggle="tab" href="#stage_{{ stage.id }}">{{ stage.stage_name }}</a>
-        </li>
-    {% endfor %}
-</ul>
-<div class="tab-content mt-3">
-    {% for stage in stages %}
-        <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="stage_{{ stage.id }}">
-            {% for answer in answers if answer.form_id in forms|selectattr('stage_id', 'equalto', stage.id)|map(attribute='id') %}
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <p><strong>{{ answer.question }}</strong></p>
-                        <p>{{ answer.answer or 'N/A' }}</p>
-                        {% if answer.file_path %}
-                            <img src="{{ answer.file_path }}" class="img-fluid" style="max-width: 200px;">
-                        {% endif %}
-                    </div>
-                </div>
-            {% endfor %}
-        </div>
-    {% endfor %}
+<div class="container mt-4">
+    <h2>Parent Details</h2>
+    {% if parent %}
+        <p><strong>Name:</strong> {{ parent.name }}</p>
+        <p><strong>Stage ID:</strong> {{ parent.stage_id }}</p>
+        <p><strong>Created At:</strong> {{ parent.created_at }}</p>
+        <h3>Answers</h3>
+        {% if answers %}
+            <table class="table table-striped">
+                <thead>
+                    <tr><th>Question</th><th>Answer</th><th>File (if any)</th></tr>
+                </thead>
+                <tbody>
+                    {% for answer in answers %}
+                        <tr>
+                            <td>{{ answer.question }}</td>
+                            <td>{{ answer.answer if answer.answer else 'N/A' }}</td>
+                            <td>{{ answer.file_path if answer.file_path else 'N/A' }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No answers available for this parent.</p>
+        {% endif %}
+        <a href="{{ url_for('report_pdf', parent_id=parent.id) }}" class="btn btn-primary">Download PDF</a>
+    {% else %}
+        <p>Parent not found.</p>
+    {% endif %}
 </div>
 {% endblock %}
