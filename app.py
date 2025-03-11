@@ -158,17 +158,19 @@ def reset_password_token(token):
     return render_template('reset_password_form.html')
 
 @app.route('/admin/dashboard')
+@app.route('/admin/dashboard/<tab>')
 @login_required
-def admin_dashboard():
+def admin_dashboard(tab=None):
     if current_user.role != 'admin':
         return redirect(url_for('staff_form'))
+    selected_stage = request.args.get('selected_stage', type=int)  # URL'den selected_stage al
     with get_db() as conn:
         users = conn.execute('SELECT * FROM users').fetchall()
         stages = conn.execute('SELECT * FROM stages').fetchall()
         parents = conn.execute('SELECT * FROM parents').fetchall()
         forms = conn.execute('SELECT f.*, s.stage_number FROM forms f JOIN stages s ON f.stage_id = s.id').fetchall()
         logs = conn.execute('SELECT l.*, u.username FROM logs l JOIN users u ON l.user_id = u.id').fetchall()
-    return render_template('admin_dashboard.html', users=users, stages=stages, parents=parents, forms=forms, logs=logs)
+    return render_template('admin_dashboard.html', users=users, stages=stages, parents=parents, forms=forms, logs=logs, active_tab=tab, selected_stage=selected_stage)
 
 @app.route('/admin/add_user', methods=['POST'])
 @login_required
@@ -264,7 +266,8 @@ def add_form():
                      (stage_id, question, type, options, allow_file_upload, required))
         conn.execute('INSERT INTO logs (user_id, action) VALUES (?, ?)', (current_user.id, f'Added form question "{question}"'))
         conn.commit()
-    return redirect(url_for('admin_dashboard'))
+    flash('Question added successfully', 'success')
+    return redirect(url_for('admin_dashboard', tab='forms', selected_stage=stage_id))
 
 @app.route('/staff/form', methods=['GET', 'POST'])
 @login_required
