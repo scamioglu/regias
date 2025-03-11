@@ -65,6 +65,8 @@ with get_db() as conn:
         
     conn.commit()
 
+pdfmetrics.registerFont(TTFont('DejaVuSans', 'DejaVuSans.ttf'))  # DejaVuSans fontunu kullanın (dosyayı projeye eklemelisiniz)
+
 class User(UserMixin):
     def __init__(self, id, username, password, role, stage_access):
         self.id = id
