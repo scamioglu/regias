@@ -14,19 +14,19 @@
     {% endwith %}
 
     <!-- Sekmeler -->
-    <ul class="nav nav-tabs">
-        <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#users">Users</a></li>
-        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#stages">Stages</a></li>
-        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#forms">Forms</a></li>
-        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#parents">Parents</a></li>
-        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#logs">Logs</a></li>
-        <li class="nav-item"><a class="nav-link" href="{{ url_for('report') }}">Reports</a></li>
+    <ul class="nav nav-tabs custom-tabs">
+        <li class="nav-item"><a class="nav-link {{ 'active' if active_tab == 'users' or not active_tab }}" data-bs-toggle="tab" href="#users">Users</a></li>
+        <li class="nav-item"><a class="nav-link {{ 'active' if active_tab == 'stages' }}" data-bs-toggle="tab" href="#stages">Stages</a></li>
+        <li class="nav-item"><a class="nav-link {{ 'active' if active_tab == 'forms' }}" data-bs-toggle="tab" href="#forms">Forms</a></li>
+        <li class="nav-item"><a class="nav-link {{ 'active' if active_tab == 'parents' }}" data-bs-toggle="tab" href="#parents">Parents</a></li>
+        <li class="nav-item"><a class="nav-link {{ 'active' if active_tab == 'logs' }}" data-bs-toggle="tab" href="#logs">Logs</a></li>
+        <li class="nav-item"><a class="nav-link {{ 'active' if active_tab == 'reports' }}" href="{{ url_for('report') }}">Reports</a></li>
     </ul>
 
     <!-- Sekme İçeriği -->
     <div class="tab-content mt-3">
         <!-- Users Sekmesi -->
-        <div class="tab-pane fade show active" id="users">
+        <div class="tab-pane fade {{ 'show active' if active_tab == 'users' or not active_tab else '' }}" id="users">
             <h3>Users</h3>
             <form method="POST" action="{{ url_for('add_user') }}" class="mb-3">
                 <div class="row g-3 align-items-center">
@@ -82,7 +82,7 @@
         </div>
 
         <!-- Stages Sekmesi -->
-        <div class="tab-pane fade" id="stages">
+        <div class="tab-pane fade {{ 'show active' if active_tab == 'stages' else '' }}" id="stages">
             <h3>Stages</h3>
             <form method="POST" action="{{ url_for('add_stage') }}" class="mb-3">
                 <div class="row g-3 align-items-center">
@@ -115,15 +115,17 @@
         </div>
 
         <!-- Forms Sekmesi -->
-        <div class="tab-pane fade" id="forms">
+        <div class="tab-pane fade {{ 'show active' if active_tab == 'forms' else '' }}" id="forms">
             <h3>Forms</h3>
             <form method="POST" action="{{ url_for('add_form') }}" class="mb-3">
                 <div class="row g-3 align-items-center">
                     <div class="col">
-                        <select class="form-select" name="stage_id" required>
-                            <option value="" disabled selected>Select Stage</option>
+                        <select class="form-select" name="stage_id" id="stage_select" required>
+                            <option value="" disabled>Select Stage</option>
                             {% for stage in stages %}
-                                <option value="{{ stage.id }}">{{ stage.stage_name }} ({{ stage.stage_number }})</option>
+                                <option value="{{ stage.id }}" {% if selected_stage == stage.id %}selected{% endif %}>
+                                    {{ stage.stage_name }} ({{ stage.stage_number }})
+                                </option>
                             {% endfor %}
                         </select>
                     </div>
@@ -157,28 +159,49 @@
                     </div>
                 </div>
             </form>
-            <table class="table table-striped">
-                <thead>
-                    <tr><th>ID</th><th>Stage</th><th>Question</th><th>Type</th><th>Options</th><th>File Upload</th><th>Required</th></tr>
-                </thead>
-                <tbody>
-                    {% for form in forms %}
-                        <tr>
-                            <td>{{ form.id }}</td>
-                            <td>{{ form.stage_number }}</td>
-                            <td>{{ form.question }}</td>
-                            <td>{{ form.type }}</td>
-                            <td>{{ form.options or 'N/A' }}</td>
-                            <td>{{ 'Yes' if form.allow_file_upload else 'No' }}</td>
-                            <td>{{ 'Yes' if form.required else 'No' }}</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+
+            <!-- Aşama Sekmeleri -->
+            <ul class="nav nav-tabs mt-4">
+                {% for stage in stages %}
+                    <li class="nav-item">
+                        <a class="nav-link {{ 'active' if loop.first and not selected_stage or selected_stage == stage.id }}" data-bs-toggle="tab" href="#stage-{{ stage.id }}">
+                            {{ stage.stage_name }} ({{ stage.stage_number }})
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+
+            <!-- Aşama İçeriği -->
+            <div class="tab-content mt-3">
+                {% for stage in stages %}
+                    <div class="tab-pane fade {{ 'show active' if loop.first and not selected_stage or selected_stage == stage.id else '' }}" id="stage-{{ stage.id }}">
+                        <h4>{{ stage.stage_name }} ({{ stage.stage_number }})</h4>
+                        <table class="table table-striped">
+                            <thead>
+                                <tr><th>ID</th><th>Question</th><th>Type</th><th>Options</th><th>File Upload</th><th>Required</th></tr>
+                            </thead>
+                            <tbody>
+                                {% for form in forms if form.stage_id == stage.id %}
+                                    <tr>
+                                        <td>{{ form.id }}</td>
+                                        <td>{{ form.question }}</td>
+                                        <td>{{ form.type }}</td>
+                                        <td>{{ form.options or 'N/A' }}</td>
+                                        <td>{{ 'Yes' if form.allow_file_upload else 'No' }}</td>
+                                        <td>{{ 'Yes' if form.required else 'No' }}</td>
+                                    </tr>
+                                {% else %}
+                                    <tr><td colspan="6">No questions available for this stage.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endfor %}
+            </div>
         </div>
 
         <!-- Parents Sekmesi -->
-        <div class="tab-pane fade" id="parents">
+        <div class="tab-pane fade {{ 'show active' if active_tab == 'parents' else '' }}" id="parents">
             <h3>Parents</h3>
             <table class="table table-striped">
                 <thead>
@@ -199,7 +222,7 @@
         </div>
 
         <!-- Logs Sekmesi -->
-        <div class="tab-pane fade" id="logs">
+        <div class="tab-pane fade {{ 'show active' if active_tab == 'logs' else '' }}" id="logs">
             <h3>Logs</h3>
             <table class="table table-striped">
                 <thead>
@@ -236,31 +259,4 @@ function toggleStageAccess() {
 }
 document.addEventListener('DOMContentLoaded', toggleStageAccess);
 </script>
-
-<!-- Özel CSS -->
-<style>
-    /* Sekme metin rengi */
-    .nav-tabs .nav-link {
-        color: #ff0000 !important; /* Kırmızı renk, !important ile Bootstrap'i geçersiz kıl */
-    }
-
-    /* Üzerine gelindiğinde */
-    .nav-tabs .nav-link:hover {
-        color: #cc0000 !important; /* Koyu kırmızı */
-        background-color: #f8f9fa; /* Hafif gri arka plan */
-    }
-
-    /* Aktif sekme */
-    .nav-tabs .nav-link.active {
-        color: #ff0000 !important; /* Aktif sekme kırmızı */
-        background-color: #e9ecef !important; /* Daha belirgin gri arka plan */
-        border-bottom: 2px solid #ff0000 !important; /* Alt çizgi kırmızı */
-        font-weight: bold; /* Kalın yazı */
-    }
-
-    /* Sekme kenarlıklarını düzenle */
-    .nav-tabs {
-        border-bottom: 1px solid #dee2e6;
-    }
-</style>
 {% endblock %}
