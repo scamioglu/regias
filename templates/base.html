@@ -1,34 +1,40 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Regias</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        /* Tüm sekmeler için kırmızı renk */
+        .nav-tabs .nav-link {
+            color: #ff0000 !important; /* Kırmızı renk */
+        }
+
+        .nav-tabs .nav-link:hover {
+            color: #cc0000 !important; /* Koyu kırmızı */
+            background-color: #f8f9fa; /* Hafif gri arka plan */
+        }
+
+        .nav-tabs .nav-link.active {
+            color: #ff0000 !important; /* Aktif sekme kırmızı */
+            background-color: #e9ecef !important; /* Daha belirgin gri arka plan */
+            border-bottom: 2px solid #ff0000 !important; /* Alt çizgi kırmızı */
+            font-weight: bold; /* Kalın yazı */
+        }
+
+        .nav-tabs {
+            border-bottom: 1px solid #dee2e6;
+        }
+    </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg">
-        <div class="container">
-            <a class="navbar-brand" href="#">Regias</a>
-            <div class="collapse navbar-collapse">
-                <ul class="navbar-nav ms-auto">
-                    {% if current_user.is_authenticated %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
-                        </li>
-                    {% endif %}
-                </ul>
+    <div class="container-fluid">
+        {% if current_user.is_authenticated %}
+            <div class="d-flex justify-content-end my-3">
+                <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
             </div>
-        </div>
-    </nav>
-    <div class="container mt-4">
-        {% with messages = get_flashed_messages() %}
-            {% if messages %}
-                {% for message in messages %}
-                    <div class="alert alert-info">{{ message }}</div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
+        {% endif %}
         {% block content %}{% endblock %}
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
