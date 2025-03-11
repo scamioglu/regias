@@ -10,6 +10,8 @@ import cloudinary.uploader
 from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table
 from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.pdfbase import pdfmetrics  # Bu satırı ekleyin
+from reportlab.pdfbase.ttfonts import TTFont
 import io
 import logging
 
@@ -65,7 +67,7 @@ with get_db() as conn:
         
     conn.commit()
 
-pdfmetrics.registerFont(TTFont('DejaVuSans', 'DejaVuSans.ttf'))  # DejaVuSans fontunu kullanın (dosyayı projeye eklemelisiniz)
+pdfmetrics.registerFont(TTFont('DejaVuSans', 'static/DejaVuSans.ttf'))
 
 class User(UserMixin):
     def __init__(self, id, username, password, role, stage_access):
